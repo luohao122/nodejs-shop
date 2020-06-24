@@ -7,6 +7,9 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
+// const { v4: uuidv4 } = require("uuid");
+
 // Setup dotenv to read env files
 const dotenv = require("dotenv");
 dotenv.config();
@@ -23,6 +26,29 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 const csrfProtection = csrf();
+
+// Setup storage for multer
+const fileStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
+  },
+});
+
+// Setup file filter for multer
+const fileFilter = (req, file, callBack) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    callBack(null, true);
+  } else {
+    callBack(null, false);
+  }
+};
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -43,9 +69,13 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+);
 
 // Setup read access only to public folder with express static middleware
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Setup configuration for your express-session
 app.use(

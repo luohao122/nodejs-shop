@@ -21,7 +21,6 @@ router.post(
       .isLength({ min: 3 })
       .trim()
       .withMessage("Title must have at least 3 characters"),
-    check("imageUrl").isURL().withMessage("Please enter a valid URL"),
     check("price")
       .isFloat()
       .withMessage("Please enter a floating number: 12.99$"),
@@ -42,7 +41,6 @@ router.post(
       .isLength({ min: 3 })
       .trim()
       .withMessage("Title must have at least 3 characters"),
-    check("imageUrl").isURL().withMessage("Please enter a valid URL"),
     check("price")
       .isFloat()
       .withMessage("Please enter a floating number: 12.99$"),
