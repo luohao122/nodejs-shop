@@ -64,21 +64,26 @@ app.use(csrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
   }
   User.findById(req.session.user._id)
     .then((user) => {
+      if (!user) {
+        return next();
+      }
       req.user = user;
       next();
     })
-    .catch((error) => console.log(error));
-});
-
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
+    .catch((error) => {
+      next(new Error(error));
+    });
 });
 
 // Setup routes, add filtering path for admin page
@@ -90,12 +95,27 @@ app.use(shopRoutes);
 // Setup routes for auth page
 app.use(authRoutes);
 
+// Setup 500 error handling page
+app.get("/500", errorController.get500);
+
 // Add catch all route to handle undefined routes (404)
 app.use(errorController.get404);
 
+app.use((error, req, res, next) => {
+  res.status(500).render("500", {
+    docTitle: "Error!",
+    path: "/500",
+    isAuthenticated: req.session.isLoggedIn,
+  });
+});
+
 // Connect to DB with mongoose
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
   .then((result) => {
     app.listen(3000);
   })

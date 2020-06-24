@@ -1,4 +1,5 @@
 const express = require("express");
+const { check } = require("express-validator");
 
 const adminController = require("../controllers/admin");
 
@@ -10,11 +11,45 @@ router.get("/add-product", isAuth, adminController.getAddProduct);
 
 router.get("/products", isAuth, adminController.getProducts);
 
-router.post("/add-product", isAuth, adminController.postAddProduct);
+router.post(
+  "/add-product",
+  isAuth,
+  [
+    check("title")
+      .isString()
+      .withMessage("Title must be alphanumeric")
+      .isLength({ min: 3 })
+      .trim()
+      .withMessage("Title must have at least 3 characters"),
+    check("imageUrl").isURL().withMessage("Please enter a valid URL"),
+    check("price")
+      .isFloat()
+      .withMessage("Please enter a floating number: 12.99$"),
+    check("description").isLength({ min: 5, max: 255 }).trim(),
+  ],
+  adminController.postAddProduct
+);
 
 router.get("/edit-product/:id", isAuth, adminController.getEditProduct);
 
-router.post("/edit-product", isAuth, adminController.postEditProduct);
+router.post(
+  "/edit-product",
+  isAuth,
+  [
+    check("title")
+      .isString()
+      .withMessage("Title must be alphanumeric")
+      .isLength({ min: 3 })
+      .trim()
+      .withMessage("Title must have at least 3 characters"),
+    check("imageUrl").isURL().withMessage("Please enter a valid URL"),
+    check("price")
+      .isFloat()
+      .withMessage("Please enter a floating number: 12.99$"),
+    check("description").isLength({ min: 5, max: 255 }).trim(),
+  ],
+  adminController.postEditProduct
+);
 
 router.post("/delete-product", isAuth, adminController.postDeleteProduct);
 
