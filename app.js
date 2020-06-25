@@ -33,6 +33,8 @@ const fileStorage = multer.diskStorage({
     cb(null, "images");
   },
   filename: function (req, file, cb) {
+    // NOTICE: If ran into isLoggedIn trouble, create image folder if you haven't
+    // gotten one Or install uuid package (Windows only)
     cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
   },
 });
