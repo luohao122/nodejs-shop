@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const stripe = require("stripe")(`${process.env.STRIPE_PRIVATE_TEST_KEY}`, {
+const stripe = require("stripe")(process.env.STRIPE_KEY, {
   apiVersion: "2020-03-02",
 });
 

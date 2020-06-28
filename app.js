@@ -8,6 +8,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const helmet = require("helmet");
 // const { v4: uuidv4 } = require("uuid");
 
 // Setup dotenv to read env files
@@ -15,9 +16,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 // Get MONGODB URI KEY
-const KEY = process.env.MONGODB_URI;
-const MONGODB_URI = `${KEY}`;
-
+const MONGODB_URI = process.env.MONGODB_URI;
 const app = express();
 
 // Setup session store for more secure and stable memory
@@ -69,6 +68,8 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
+
+app.use(helmet());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -149,7 +150,7 @@ mongoose
     useCreateIndex: true,
   })
   .then((result) => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch((error) => {
     console.log(error);
