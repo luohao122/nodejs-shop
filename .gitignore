@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+# cert
+server.cert
+server.key
+
 # api keys
 .env
 

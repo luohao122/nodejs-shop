@@ -1,4 +1,6 @@
 const path = require("path");
+const fs = require("fs");
+const https = require("https");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -9,6 +11,8 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
 // const { v4: uuidv4 } = require("uuid");
 
 // Setup dotenv to read env files
@@ -25,6 +29,9 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 const csrfProtection = csrf();
+
+// const privateKey = fs.readFileSync("server.key");
+// const certificate = fs.readFileSync("server.cert");
 
 // Setup storage for multer
 const fileStorage = multer.diskStorage({
@@ -68,8 +75,21 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  {
+    flags: "a",
+  }
+);
 
+// Setup helmet for secure response headers
 app.use(helmet());
+
+// Setup compression to compress assets: js, css files
+app.use(compression());
+
+// Setup morgan to log request
+app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -150,6 +170,10 @@ mongoose
     useCreateIndex: true,
   })
   .then((result) => {
+    // Serve node app as https mode
+    // https
+    //   .createServer({ key: privateKey, cert: certificate }, app)
+    //   .listen(process.env.PORT || 3000);
     app.listen(process.env.PORT || 3000);
   })
   .catch((error) => {
